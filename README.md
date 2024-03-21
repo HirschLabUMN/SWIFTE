@@ -1,7 +1,7 @@
 # SWIF-TE
 
 SWIF-TE (Short-read Whole-genome Insertion Finder for Transposable Elements) is a powerful tool designed to identify transposable element insertions (TIPs) using short-read data.
-<img src="SWIFT_TE.png" alt="Example Image">
+<img src="SWIF_TE.png" alt="Example Image">
 ## Features
 
 -   **Memory Efficiency**: SWIF-TE works by loading in small chunks of sequence from a SAM file at a time, becoming much more memory efficient than other tools.
