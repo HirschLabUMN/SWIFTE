@@ -89,5 +89,6 @@ If you encounter any issues or have questions about SWIF-TE, please email (menar
 ## Feedback
 
 We value your feedback! Help us improve SWIF-TE by sharing your thoughts and suggestions with us. Send your feedback to [feedback\@example.com](mailto:feedback@example.com).
-
+## Collaborators
+Thank you to everyone who helped write, develop and benchmark SWIF-TE. Special thanks to Adrian Platts and Nathan Catlin at MSU.
 ------------------------------------------------------------------------
