@@ -1,14 +1,3 @@
----
-title: "SWIF-TE: Short-read Whole-genome Insertion Finder for Transposable Elements"
-author: "Claire Menard"
-date: "`r format(Sys.time(), '%B %d, %Y')`"
-output:
-  html_document:
-    toc: true
-    toc_float: true
-    number_sections: true
----
-
 # SWIF-TE
 
 SWIF-TE (Short-read Whole-genome Insertion Finder for Transposable Elements) is a powerful tool designed to identify transposable element insertions (TIPs) using short-read data.
