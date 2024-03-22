@@ -70,9 +70,10 @@ To begin using SWIF-TE, follow these simple steps:
 
 : Table: Example output of SWIF-TE
 
--   The output data can be best viewed in genome order:
+-   The raw output data can be best viewed in genome order:
 
-    -   `sort -k1,1 -k2,2n <output_file_name>`
+    -   `sort -k1V,1 -k5,5n <output_file_name>`
+    -   Best practice: run ./clean_SWIFTE.sh to update header with necessary info, filter for read count support (default is 5)
 
 **Example data**
 
