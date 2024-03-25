@@ -1,0 +1,5 @@
+This folder contains example data files downloaded from:
+http://adrianplatts.com/rpt.sam.gz
+http://adrianplatts.com/genomic.sam.gz
+
+Run SWIF-TE with these files to make sure it's running correctly.
