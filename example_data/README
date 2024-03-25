@@ -7,5 +7,3 @@ gunzip genomic.sam.gz
 #Run SWIF-TE with these files to make sure it's running correctly.
 ./aMizeNG genomic.sam rpt.sam
 sort -k1,1 -k2,2n genomic.sam.inserts.txt
-
-#Expected Output:
