@@ -77,6 +77,54 @@ To begin using SWIF-TE, follow these simple steps:
 
 **Example data**
 
+1.  Download example data files:
+
+    1.  `wget http://adrianplatts.com/rpt.sam.gz`
+    2.  `wget http://adrianplatts.com/genomic.sam.gz`
+    3.  `gunzip rpt.sam.gz`
+    4.  `gunzip genomic.sam.gz`
+
+2.  Run SWIF-TE with these files to make sure it's working correctly.
+
+    1.  `./SWIFTE genmoic.sam rpt.sam`
+    2.  `sort -k1,1 -k2,2n genomic.sam.inserts.txt`
+
+3.  Expected output:
+
+    | Position | TE        |
+    |----------|-----------|
+    | 1000000  | TNAT1A    |
+    | 2000000  | AT9NMU1   |
+    | 3000000  | ATLINE1A  |
+    | 4000000  | ATENSPM8  |
+    | 5000000  | ATENSPM9  |
+    | 6000000  | ATENSPM4  |
+    | 7000000  | ATENSPM5  |
+    | 8000000  | ATENSPM6  |
+    | 9000000  | ATENSPM7  |
+    | 10000000 | ATENSPM1  |
+    | 11000000 | ATENSPM2  |
+    | 12000000 | ATENSPM3  |
+    | 13000000 | VANDAL20  |
+    | 14000000 | ATTIRX1D  |
+    | 15000000 | ATTIRX1C  |
+    | 16000000 | ATHILA    |
+    | 17000000 | ATCOPIA28 |
+    | 18000000 | ATCOPIA29 |
+    | 19000000 | ATCOPIA26 |
+    | 20000000 | ATCOPIA27 |
+    | 21000000 | ATCOPIA24 |
+    | 22000000 | ATCOPIA25 |
+    | 23000000 | ATCOPIA22 |
+    | 24000000 | ATCOPIA23 |
+    | 25000000 | ATCOPIA20 |
+    | 26000000 | ATCOPIA21 |
+    | 27000000 | VANDALNX1 |
+    | 28000000 | ATHPOGO   |
+    | 29000000 | VANDAL17  |
+
+    : Expected reference position of TE inserts in the read data.
+
 ### Notes
 
 -   You can rename reads to be guaranteed unique names with something like:
