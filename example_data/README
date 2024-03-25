@@ -1,5 +1,11 @@
-This folder contains example data files downloaded from:
-http://adrianplatts.com/rpt.sam.gz
-http://adrianplatts.com/genomic.sam.gz
+#Download example data:
+wget http://adrianplatts.com/rpt.sam.gz
+wget http://adrianplatts.com/genomic.sam.gz
+gunzip rpt.sam.gz
+gunzip genomic.sam.gz
 
-Run SWIF-TE with these files to make sure it's running correctly.
+#Run SWIF-TE with these files to make sure it's running correctly.
+./aMizeNG genomic.sam rpt.sam
+sort -k1,1 -k2,2n genomic.sam.inserts.txt
+
+#Expected Output:
