@@ -12,8 +12,10 @@ SWIF-TE (Short-read Whole-genome Insertion Finder for Transposable Elements) is 
 
 To begin using SWIF-TE, follow these simple steps:
 
-1.  **Download**: Clone this repository. Visit [SWIF-TE's website](https://www.example.com/swif-te) to download the latest version of the tool.
+1.  **Download**: Clone this repository.
+    -   `git clone <link>`
 
+    -   `cd SWIFTE/`
 2.  **Installation**: Follow the installation instructions provided on the website to install SWIF-TE on your system.
 
     -   `unzip SWIFTE.zip`
