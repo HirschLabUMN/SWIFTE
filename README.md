@@ -15,20 +15,20 @@ To begin using SWIF-TE, follow these simple steps:
 1.  **Download**: Clone this repository.
     -   `git clone <link>`
 
-    -   `cd SWIFTE/`
+    -   `cd SWIFTEv35/`
 2.  **Installation**: Follow the installation instructions provided on the website to install SWIF-TE on your system.
 
-    -   `unzip SWIFTE.zip`
+    -   `unzip SWIFTEv35.zip`
 
-    -   `chmod +x SWIFTE`
+    -   `chmod +x SWIFTEv35`
 
 3.  **Test if it works**: Once installed, launch SWIF-TE to start exploring its features and capabilities.
 
-    -   `./SWIFTE`
+    -   `./SWIFTEv35`
 
         -   If you get a shared library error, could you execute the command below and send me the output so I can see what libraries need adding the following.
 
-            -   `ldd SWIFTE`
+            -   `ldd SWIFTEv35`
 
         -   Generally missing shared libraries (.so) just need to be dropped into the SWIFTE Libs folder (or installed at the system level).
 
@@ -56,11 +56,11 @@ To begin using SWIF-TE, follow these simple steps:
 
 ### Running SWIF-TE
 
-`./SWIFTE genomic.sam rpt.sam`
+`./SWIFTEv35 genomic.sam rpt.sam`
 
 -   Can also define the soft-clip threshold (default is 40). Here is an example:
 
-    -   `./SWIFTE genomic.sam rpt.sam 40,40`
+    -   `./SWIFTEv35 genomic.sam rpt.sam 40,40`
 
 **Output**
 
@@ -79,16 +79,16 @@ To begin using SWIF-TE, follow these simple steps:
 
 **Example data**
 
-1.  Download example data files:
+1.  Access example data files:
 
-    1.  `wget http://adrianplatts.com/rpt.sam.gz`
-    2.  `wget http://adrianplatts.com/genomic.sam.gz`
-    3.  `gunzip rpt.sam.gz`
-    4.  `gunzip genomic.sam.gz`
+    1.  `cd example_data/`
+    2.  `gunzip rpt.sam.gz`
+    3.  `gunzip genomic.sam.gz`
+    4.  'cd ..'
 
 2.  Run SWIF-TE with these files to make sure it's working correctly.
 
-    1.  `./SWIFTE genmoic.sam rpt.sam`
+    1.  `./SWIFTEv35 example_data/genomic.sam example_data/rpt.sam`
     2.  `sort -k1,1 -k2,2n genomic.sam.inserts.txt`
 
 3.  Expected output:
@@ -135,11 +135,11 @@ To begin using SWIF-TE, follow these simple steps:
 
 ## Support
 
-If you encounter any issues or have questions about SWIF-TE, please email (menar060\@umn.edu) or submit a Github ticket!
+If you encounter any issues or have questions about SWIF-TE, please email (menar060@umn.edu) or submit a Github ticket!
 
 ## Feedback
 
-We value your feedback! Help us improve SWIF-TE by sharing your thoughts and suggestions with us. Send your feedback to [feedback\@example.com](mailto:feedback@example.com).
+We value your feedback! Help us improve SWIF-TE by sharing your thoughts and suggestions with us. Send your feedback to menar060@umn.edu.
 ## Collaborators
 
 Thank you to everyone who helped write, develop and benchmark SWIF-TE. Special thanks to Adrian Platts and Nathan Catlin at MSU.
