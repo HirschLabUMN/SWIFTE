@@ -56,11 +56,11 @@ To begin using SWIF-TE, follow these simple steps:
 
 ### Running SWIF-TE
 
-`./aMizeNG genomic.sam rpt.sam`
+`./SWIFTE genomic.sam rpt.sam`
 
 -   Can also define the soft-clip threshold (default is 40). Here is an example:
 
-    -   `./aMizeNG genomic.sam rpt.sam 40,40`
+    -   `./SWIFTE genomic.sam rpt.sam 40,40`
 
 **Output**
 
