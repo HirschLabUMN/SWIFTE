@@ -45,8 +45,8 @@ To begin using SWIF-TE, follow these simple steps:
 -   **Reads**
     -   SWIF-TE has been built for 1x150nt Illumnia reads. It will work down to 1x100nt reads but will lose sensitivity. We haven't tested longer Illumnia reads but those should also work. If you have paired-end reads, you can concatenate both ends to a single-end file but need to make sure the read names are different (\*see notes).
 -   **Trimming**
-    -   Reads need to be trimmed. We chose \_\_\_ , but any should work.
-        -   `cutadapt -a AGATCGGAAGAG -q 20 -m 50 -o reads.fastq input.fastq`
+    -   Reads need to be trimmed. We chose trimmomatic , but any should work.
+        -   `PE -threads 16 -phred33 ILLUMINACLIP:all_illumina_adapters.fa:2:20:10 LEADING:3 TRAILING:3 MINLEN:25 reads.fastq input.fastq`
 -   **Aligning to genome**
     -   If the reads are up to 3% diverged from the reference, the command below should work. If there is more divergence, change ---local to --very-sensitivite-local. Assuming 4 threads and reads are named reads.fastq
         -   `bowtie2 -p 4 -x Thal -U reads.fastq -S genomic.sam --local`
