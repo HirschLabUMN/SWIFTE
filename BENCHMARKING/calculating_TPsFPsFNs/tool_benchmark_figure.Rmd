@@ -1,0 +1,656 @@
+---
+---
+title: "Comparison of Benchmarked Tools"
+author: "Claire C. Menard (menar060@umn.edu)"
+date: "2024-01-22"
+output:
+  pdf_document: default
+  html_document: default
+  github_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r message = FALSE, warning=FALSE}
+#loading libraries
+library(ggplot2)
+library(tidyr)
+library(devtools)
+library(dplyr)
+library(grid)
+library(RColorBrewer)
+library(gridExtra)
+SWIFTE_colors2 <- c("#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462")
+
+SWIFTE_colors <- c("#332288", "#117733", "#DDCC77", "#CC6677", "#AA4499", "#882255", "#44AA99", "#88CCEE")
+```
+
+```{r, include=FALSE}
+#making gradient for plots function
+make_gradient <- function(deg = 45, n = 100, cols = blues9) {
+  cols <- colorRampPalette(cols)(n + 1)
+  rad <- deg / (180 / pi)
+  mat <- matrix(
+    data = rep(seq(0, 1, length.out = n) * cos(rad), n),
+    byrow = TRUE,
+    ncol = n
+  ) +
+  matrix(
+    data = rep(seq(0, 1, length.out = n) * sin(rad), n),
+    byrow = FALSE,
+    ncol = n
+  )
+  mat <- mat - min(mat)
+  mat <- mat / max(mat)
+  mat <- 1 + mat * n
+  mat <- matrix(data = cols[round(mat)], ncol = n)
+  grid::rasterGrob(
+    image = mat,
+    width = unit(1, "npc"),
+    height = unit(1, "npc"), 
+    interpolate = TRUE
+  )
+}
+g <- make_gradient(
+  deg = 45, n = 500, cols = brewer.pal(9, "Greys")
+)
+
+```
+
+```{r}
+# Define the make_gradient function
+make_gradient <- function(deg = 45, n = 100, darkest_color = "#000000", lighter_color = "#FFFFFF") {
+  cols <- colorRampPalette(c(lighter_color, darkest_color))(n + 1)
+  rad <- deg / (180 / pi)
+  mat <- matrix(
+    data = rep(seq(0, 1, length.out = n) * cos(rad), n),
+    byrow = TRUE,
+    ncol = n
+  ) +
+  matrix(
+    data = rep(seq(0, 1, length.out = n) * sin(rad), n),
+    byrow = FALSE,
+    ncol = n
+  )
+  mat <- mat - min(mat)
+  mat <- mat / max(mat)
+  mat <- 1 + mat * n
+  mat <- matrix(data = cols[round(mat)], ncol = n)
+  grid::rasterGrob(
+    image = mat,
+    width = unit(1, "npc"),
+    height = unit(1, "npc"), 
+    interpolate = TRUE
+  )
+}
+
+# Assuming g is defined using make_gradient function
+g <- make_gradient(
+  deg = 45, n = 500,
+  darkest_color = "#000000",  # Change this to your desired darkest color (black)
+  lighter_color = "#FFFFFF"   # Change this to your desired lighter color (white)
+)
+
+
+```
+
+```{r}
+# Define the column names
+column_names <- c("program_name", "precision", "FDR", "sensitivity", "F1", "power_of_discovery", "memory", "runtime")
+
+# Define the input data
+results <- c("program_name", "TP", "FP", "FN", "memory", "runtime")
+
+TIP_finder_results <- c("TIP_finder", 655, 70796, 10568, 0.005161, 4.1415)
+TEfinder_results <- c("TEfinder", 1213, 80687, 10025, 0.001129, 8.794)
+TEMP2_results <- c("TEMP2", 610, 1001, 10616, 0.002775, 18.83)
+SWIFTE_results <- c("SWIF-TE", 1438, 3803, 9787, 0.000056, 0.83684)
+
+# Create a data frame
+results_df <- data.frame(
+  program_name = c(TIP_finder_results[1], TEfinder_results[1], TEMP2_results[1], SWIFTE_results[1]),
+  TP = as.numeric(c(TIP_finder_results[2], TEfinder_results[2], TEMP2_results[2], SWIFTE_results[2])),
+  FP = as.numeric(c(TIP_finder_results[3], TEfinder_results[3], TEMP2_results[3], SWIFTE_results[3])),
+  FN = as.numeric(c(TIP_finder_results[4], TEfinder_results[4], TEMP2_results[4], SWIFTE_results[4])),
+  memory = as.numeric(c(TIP_finder_results[5], TEfinder_results[5], TEMP2_results[5], SWIFTE_results[5])),
+  runtime = as.numeric(c(TIP_finder_results[6], TEfinder_results[6], TEMP2_results[6], SWIFTE_results[6]))
+)
+
+# Calculate precision
+results_df$precision <- results_df$TP / (results_df$TP + results_df$FP)
+
+# Calculate FDR
+results_df$FDR <- results_df$FP / (results_df$TP + results_df$FP)
+
+# Calculate sensitivity
+results_df$sensitivity <- results_df$TP / (results_df$TP + results_df$FN)
+
+# Calculate F1 score
+results_df$F1 <- 2 * (results_df$precision * results_df$sensitivity) / (results_df$precision + results_df$sensitivity)
+
+# Calculate power of discovery
+results_df$power_of_discovery <- results_df$TP / (11227)
+
+# Print the data frame
+
+#multiplying by num of TEs run on
+results_df$runtime <- ((results_df$runtime * 18126) / 3600)
+results_df$memory <- results_df$memory * 18126
+# Check the data types
+#str(results_df)
+print(results_df)
+
+```
+
+
+
+```{r, include=FALSE}
+column_names <- c("program_name", "precision", "FDR", "sensitivity", "F1", "power_of_discovery", "memory", "runtime")
+
+
+
+TEMP2_results <- c("TEMP2", 0.3418342325, 0.6581657675, 0.06208247974, 0.1050806573, 0.06208247974, 0.002775, 18.83)
+SWIFTE_results <- c("SWIF-TE", 0.254327335, 0.745672665, 0.1321813485, 0.1739538155, 0.1321813485, 0.000056, 0.83684)
+TEfinder_results <- c("TEfinder", 0.04581872521, 0.9541812748, 0.08358496896, 0.05919084071, 0.08402674436, 0.001129, 8.794)
+TIP_finder_results <- c("TIP_finder", 0.0346028861, 0.9653971139, 0.05270774781, 0.04177819155, 0.05336295613, 0.005161, 4.1415)
+
+
+# Create a data frame
+results_df <- data.frame(
+  program_name = c(TEMP2_results[1], SWIFTE_results[1], TEfinder_results[1], TIP_finder_results[1]),
+  precision = c(TEMP2_results[2], SWIFTE_results[2], TEfinder_results[2], TIP_finder_results[2]),
+  FDR = c(TEMP2_results[3], SWIFTE_results[3], TEfinder_results[3], TIP_finder_results[3]),
+  sensitivity = c(TEMP2_results[4], SWIFTE_results[4], TEfinder_results[4], TIP_finder_results[4]),
+  F1 = c(TEMP2_results[5], SWIFTE_results[5], TEfinder_results[5], TIP_finder_results[5]),
+  power_of_discovery = c(TEMP2_results[6], SWIFTE_results[6], TEfinder_results[6], TIP_finder_results[6]),
+  memory = c(TEMP2_results[7], SWIFTE_results[7], TEfinder_results[7], TIP_finder_results[7]),
+  runtime = c(TEMP2_results[8], SWIFTE_results[8], TEfinder_results[8], TIP_finder_results[8])
+)
+
+# Print the data frame
+print(results_df)
+
+numeric_columns <- c("precision", "FDR", "sensitivity", "F1", "power_of_discovery", "memory", "runtime")
+
+# Convert the specified columns to numeric
+results_df[numeric_columns] <- apply(results_df[numeric_columns], 2, as.numeric)
+
+# Check the data types
+str(results_df)
+# Convert elements to numeric if they are not already
+TEMP2_results[8] <- as.numeric(TEMP2_results[8])
+SWIFTE_results[8] <- as.numeric(SWIFTE_results[8])
+TEfinder_results[8] <- as.numeric(TEfinder_results[8])
+TIP_finder_results[8] <- as.numeric(TIP_finder_results[8])
+#multiplying by num of TEs run on
+results_df$runtime <- ((results_df$runtime * 18126) / 3600)
+results_df$memory <- results_df$memory * 18126
+
+```
+## Comparison of tools runtime versus precision
+```{r}
+
+results_plot <- results_df %>%
+  ggplot(aes(x = runtime, y = precision, shape = program_name, fill = program_name)) +
+  annotation_custom(
+    grob = g, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf
+  ) +
+  geom_point(size=3, colour='white') +
+  labs(
+    title = "Scatter Plot for Precision vs. Runtime",
+    x = "Runtime (hours)",
+    y = "Precision",
+    fill = "program"  # Set the legend title for fill
+  ) +
+  ylim(0, 0.4) +
+  scale_fill_manual(values = c("SWIF-TE" = SWIFTE_colors[1], "TEfinder" = SWIFTE_colors[2], "TEMP2" = SWIFTE_colors[3], "TIP_finder" = SWIFTE_colors[4])) +
+  scale_shape_manual(values = c(21,22,23,24)) +
+  guides(
+    shape = guide_legend(title = "program"),  # Set the legend title for shape
+    fill = guide_legend(title = "program")   # Set the legend title for fill
+  ) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1),
+    panel.background = element_rect(fill='transparent'), #transparent panel bg
+    plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+    panel.grid.major = element_blank(), #remove major gridlines
+    panel.grid.minor = element_blank(),
+    legend.key = element_rect(fill = "transparent"), 
+    legend.background = element_rect(fill='transparent'), #transparent legend bg
+    legend.box.background = element_rect(fill = NA, color = "black"),
+    legend.text = element_text(color="black"),
+    legend.title = element_text(color="black"),
+    legend.position= "top"
+    #transparent legend panel
+  ) 
+    
+results_plot
+#ggsave('myplot.png', results_plot, bg='transparent')
+#change runtime from seconds to minutes or hours etc., add white or black outline to shapes
+
+```
+
+```{r}
+library(ggplot2)
+library(gridExtra)
+
+# Assuming g is defined previously
+
+results_plot <- results_df %>%
+  ggplot(aes(x = runtime, y = precision, shape = program_name, fill = program_name)) +
+  annotation_custom(
+    grob = g, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf
+  ) +
+  geom_point(size=3, colour='white') +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1)) +
+  labs(
+    title = "Scatter Plot for Precision vs. Runtime",
+    x = "Runtime (hours)",
+    y = "Precision",
+    fill = "program"  # Set the legend title for fill
+  ) +
+  ylim(0, 0.4) +
+  theme(legend.position = "bottom") + 
+  scale_fill_manual(values = c("SWIF-TE" = SWIFTE_colors[1], "TEfinder" = SWIFTE_colors[2], "TEMP2" = SWIFTE_colors[3], "TIP_finder" = SWIFTE_colors[4])) +
+  scale_shape_manual(values = c(21,22,23,24)) +
+  guides(
+    shape = guide_legend(title = "program"),  # Set the legend title for shape
+    fill = guide_legend(title = "program")   # Set the legend title for fill
+  ) +
+  theme(
+    panel.background = element_rect(fill='transparent'), #transparent panel bg
+    plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+    panel.grid.major = element_blank(), #remove major gridlines
+    panel.grid.minor = element_blank(),
+    legend.background = element_rect(fill='transparent'),# Set legend box color
+    legend.box.background = element_rect(fill='white'), # Set legend box color
+    legend.text = element_text(color = "white"), # Set legend text color
+    legend.title = element_text(color = "white",hjust = 0.5) # Set legend title color
+  ) +
+  theme_minimal() # Apply a minimal theme for better aesthetics
+
+#ggsave('myplot.png', results_plot, bg='transparent')
+results_plot
+```
+
+
+
+Plotting all the subpanels together
+```{r}
+
+
+# Scatter Plot for Precision vs. Runtime
+plot1 <- results_df %>%
+  ggplot(aes(x = runtime, y = precision, shape = program_name, fill = program_name)) +
+  annotation_custom(
+    grob = g, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf
+  ) + 
+  geom_point(size = 3) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1)) +
+  scale_fill_manual(values = c("SWIF-TE" = SWIFTE_colors[1], "TEfinder" = SWIFTE_colors[2], "TEMP2" = SWIFTE_colors[3], "TIP_finder" = SWIFTE_colors[4])) +
+  scale_shape_manual(values = c(21,22,23,24))+
+  geom_point(size=3, colour='white') +
+  guides(color = "none", shape = "none")+
+  labs(x = NULL, y = NULL) +
+  ylim(0, 0.4)+ 
+  theme( text = element_text(color = "black"),
+    axis.line = element_line(color = "black"),
+    axis.ticks = element_line(color = "black"),  
+    axis.text = element_text(color = "black"), 
+    legend.position = "none",
+    panel.background = element_rect(fill='transparent'), #transparent panel bg
+    plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+    panel.grid.major = element_blank(), #remove major gridlines
+    panel.grid.minor = element_blank(), #remove minor gridlines
+    
+  )
+
+# Scatter Plot for Sensitivity vs. Runtime
+plot2 <- results_df %>%
+  ggplot(aes(x = runtime, y = sensitivity, shape = program_name, fill = program_name)) + annotation_custom(
+    grob = g, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf
+  ) +
+  geom_point(size = 3) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1)) + 
+  scale_fill_manual(values = c("SWIF-TE" = SWIFTE_colors[1], "TEfinder" = SWIFTE_colors[2], "TEMP2" = SWIFTE_colors[3], "TIP_finder" = SWIFTE_colors[4])) +
+  scale_shape_manual(values = c(21,22,23,24))+
+  geom_point(size=3, colour='white') +
+  guides(color = "none", shape = "none")+
+  labs(x = NULL, y = NULL) +
+  ylim(0, 0.15)+ 
+  theme( text = element_text(color = "black"),
+    axis.line = element_line(color = "black"),
+    axis.ticks = element_line(color = "black"),  
+    axis.text = element_text(color = "black"), 
+    legend.position = "none",
+    panel.background = element_rect(fill='transparent'), #transparent panel bg
+    plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+    panel.grid.major = element_blank(), #remove major gridlines
+    panel.grid.minor = element_blank(), #remove minor gridlines
+    
+  )
+
+# Scatter Plot for Power of Discovery vs. Runtime
+plot3 <- results_df %>%
+  ggplot(aes(x = runtime, y = F1, shape = program_name, fill = program_name)) +
+  annotation_custom(
+    grob = g, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf
+  ) +
+  geom_point(size = 3) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1)) + 
+  scale_fill_manual(values = c("SWIF-TE" = SWIFTE_colors[1], "TEfinder" = SWIFTE_colors[2], "TEMP2" = SWIFTE_colors[3], "TIP_finder" = SWIFTE_colors[4])) +
+  scale_shape_manual(values = c(21,22,23,24))+
+  geom_point(size=3, colour='white') +
+  guides(color = "none", shape = "none")+
+  labs(x = NULL, y = NULL)+
+  ylim(0, 0.2)+ 
+  theme( text = element_text(color = "black"),
+    axis.line = element_line(color = "black"),
+    axis.ticks = element_line(color = "black"), 
+    axis.text = element_text(color = "black"), 
+    legend.position = "none",
+    panel.background = element_rect(fill='transparent'), #transparent panel bg
+    plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+    panel.grid.major = element_blank(), #remove major gridlines
+    panel.grid.minor = element_blank(), #remove minor gridlines
+    
+  )
+# Scatter Plot for Precision vs. Memory
+plot4 <- results_df %>%
+  ggplot(aes(x = memory, y = precision, shape = program_name, fill = program_name)) +
+  annotation_custom(
+    grob = g, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf
+  ) +
+  geom_point(size = 3) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1)) +
+  scale_fill_manual(values = c("SWIF-TE" = SWIFTE_colors[1], "TEfinder" = SWIFTE_colors[2], "TEMP2" = SWIFTE_colors[3], "TIP_finder" = SWIFTE_colors[4])) +
+  scale_shape_manual(values = c(21,22,23,24))+
+  geom_point(size=3, colour='white') +
+  labs(x = "Memory (Gb/TE)", y = "Precision")+
+  guides(color = "none", shape = "none")+
+  labs(x = NULL, y = NULL)+
+  ylim(0, 0.4)+ 
+  theme( text = element_text(color = "black"),
+    axis.line = element_line(color = "black"),
+    axis.ticks = element_line(color = "black"),  
+    axis.text = element_text(color = "black"), 
+    legend.position = "none",
+    panel.background = element_rect(fill='transparent'), #transparent panel bg
+    plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+    panel.grid.major = element_blank(), #remove major gridlines
+    panel.grid.minor = element_blank(), #remove minor gridlines
+    
+  )
+# Scatter Plot for Sensitivity vs. Memory
+plot5 <- results_df %>%
+  ggplot(aes(x = memory, y = sensitivity, shape = program_name, fill = program_name)) +
+  annotation_custom(
+    grob = g, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf
+  ) +
+  geom_point(size = 3) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1)) + 
+  scale_fill_manual(values = c("SWIF-TE" = SWIFTE_colors[1], "TEfinder" = SWIFTE_colors[2], "TEMP2" = SWIFTE_colors[3], "TIP_finder" = SWIFTE_colors[4])) +
+  scale_shape_manual(values = c(21,22,23,24))+
+  geom_point(size=3, colour='white') +
+  labs(x = "Memory (Gb/TE)", y = "Sensitivity")+
+  guides(color = "none", shape = "none")+
+  labs(x = NULL, y = NULL)+
+  ylim(0, 0.15)+ 
+  theme(text = element_text(color = "black"),
+    axis.line = element_line(color = "black"),
+    axis.ticks = element_line(color = "black"), 
+    axis.text = element_text(color = "black"), 
+    legend.position = "none",
+    panel.background = element_rect(fill='transparent'), #transparent panel bg
+    plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+    panel.grid.major = element_blank(), #remove major gridlines
+    panel.grid.minor = element_blank(), #remove minor gridlines
+    
+  )
+# Scatter Plot for Power of Discovery vs. Memory
+plot6 <- results_df %>%
+  ggplot(aes(x = memory, y = F1, shape = program_name, fill = program_name)) +
+  annotation_custom(
+    grob = g, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf
+  ) +
+  geom_point(size = 3) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1)) +
+  scale_fill_manual(values = c("SWIF-TE" = SWIFTE_colors[1], "TEfinder" = SWIFTE_colors[2], "TEMP2" = SWIFTE_colors[3], "TIP_finder" = SWIFTE_colors[4])) +
+  scale_shape_manual(values = c(21,22,23,24))+
+  geom_point(size=3, colour='white') +
+  labs(x = "Memory (Gb/TE)", y = "Power of Discovery")+
+  guides(color = "none", shape = "none")+
+  labs(x = NULL, y = NULL)+
+  ylim(0, 0.2)+ 
+  theme( text = element_text(color = "black"),
+    axis.line = element_line(color = "black"),
+    axis.ticks = element_line(color = "black"),  
+    axis.text = element_text(color = "black"), 
+    legend.position = "none",
+    panel.background = element_rect(fill='transparent'), #transparent panel bg
+    plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+    panel.grid.major = element_blank(), #remove major gridlines
+    panel.grid.minor = element_blank(), #remove minor gridlines
+    
+  )
+# Your individual plot code (plot1, plot4, plot2, plot5, plot3, plot6) here
+
+# Combine the plots in a 2x3 grid
+combined_plot <- grid.arrange(plot1, plot4, plot2, plot5, plot3, plot6, ncol = 2)
+
+# Save the combined plot with specific dimensions
+#ggsave("output_plot.png", plot = combined_plot, width = 7.5, height = 5, units = "in", dpi = 300, bg='transparent')
+
+```
+
+```{r}
+filtered_results <- results_df %>%
+  filter(program_name != "SWIF-TE")
+
+# Scatter Plot for Precision vs. Runtime
+plot1 <- filtered_results %>%
+  ggplot(aes(x = runtime, y = precision, shape = program_name, fill = program_name)) +
+  annotation_custom(
+    grob = g, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf
+  ) + 
+  geom_point(size = 3) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1)) +
+  scale_fill_manual(values = c("SWIF-TE" = SWIFTE_colors[1], "TEfinder" = SWIFTE_colors[2], "TEMP2" = SWIFTE_colors[3], "TIP_finder" = SWIFTE_colors[4])) +
+  scale_shape_manual(values = c(21,22,23,24))+
+  geom_point(size=3, colour='white') +
+  guides(color = "none", shape = "none")+
+  labs(x = NULL, y = NULL) +
+  ylim(0, 0.4)+ 
+  theme( text = element_text(color = "black"),
+    axis.line = element_line(color = "black"),
+    axis.ticks = element_line(color = "black"),  
+    axis.text = element_text(color = "black"), 
+    legend.position = "none",
+    panel.background = element_rect(fill='transparent'), #transparent panel bg
+    plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+    panel.grid.major = element_blank(), #remove major gridlines
+    panel.grid.minor = element_blank(), #remove minor gridlines
+    
+  )
+
+# Scatter Plot for Sensitivity vs. Runtime
+plot2 <- filtered_results %>%
+  ggplot(aes(x = runtime, y = sensitivity, shape = program_name, fill = program_name)) + annotation_custom(
+    grob = g, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf
+  ) +
+  geom_point(size = 3) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1)) + 
+  scale_fill_manual(values = c("SWIF-TE" = SWIFTE_colors[1], "TEfinder" = SWIFTE_colors[2], "TEMP2" = SWIFTE_colors[3], "TIP_finder" = SWIFTE_colors[4])) +
+  scale_shape_manual(values = c(21,22,23,24))+
+  geom_point(size=3, colour='white') +
+  guides(color = "none", shape = "none")+
+  labs(x = NULL, y = NULL) +
+  ylim(0, 0.15)+ 
+  theme( text = element_text(color = "black"),
+    axis.line = element_line(color = "black"),
+    axis.ticks = element_line(color = "black"),  
+    axis.text = element_text(color = "black"), 
+    legend.position = "none",
+    panel.background = element_rect(fill='transparent'), #transparent panel bg
+    plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+    panel.grid.major = element_blank(), #remove major gridlines
+    panel.grid.minor = element_blank(), #remove minor gridlines
+    
+  )
+
+# Scatter Plot for Power of Discovery vs. Runtime
+plot3 <- filtered_results %>%
+  ggplot(aes(x = runtime, y = power_of_discovery, shape = program_name, fill = program_name)) +
+  annotation_custom(
+    grob = g, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf
+  ) +
+  geom_point(size = 3) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1)) + 
+  scale_fill_manual(values = c("SWIF-TE" = SWIFTE_colors[1], "TEfinder" = SWIFTE_colors[2], "TEMP2" = SWIFTE_colors[3], "TIP_finder" = SWIFTE_colors[4])) +
+  scale_shape_manual(values = c(21,22,23,24))+
+  geom_point(size=3, colour='white') +
+  guides(color = "none", shape = "none")+
+  labs(x = NULL, y = NULL)+
+  ylim(0, 0.15)+ 
+  theme( text = element_text(color = "black"),
+    axis.line = element_line(color = "black"),
+    axis.ticks = element_line(color = "black"), 
+    axis.text = element_text(color = "black"), 
+    legend.position = "none",
+    panel.background = element_rect(fill='transparent'), #transparent panel bg
+    plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+    panel.grid.major = element_blank(), #remove major gridlines
+    panel.grid.minor = element_blank(), #remove minor gridlines
+    
+  )
+# Scatter Plot for Precision vs. Memory
+plot4 <- filtered_results %>%
+  ggplot(aes(x = memory, y = precision, shape = program_name, fill = program_name)) +
+  annotation_custom(
+    grob = g, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf
+  ) +
+  geom_point(size = 3) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1)) +
+  scale_fill_manual(values = c("SWIF-TE" = SWIFTE_colors[1], "TEfinder" = SWIFTE_colors[2], "TEMP2" = SWIFTE_colors[3], "TIP_finder" = SWIFTE_colors[4])) +
+  scale_shape_manual(values = c(21,22,23,24))+
+  geom_point(size=3, colour='white') +
+  labs(x = "Memory (Gb/TE)", y = "Precision")+
+  guides(color = "none", shape = "none")+
+  labs(x = NULL, y = NULL)+
+  ylim(0, 0.4)+ 
+  theme( text = element_text(color = "black"),
+    axis.line = element_line(color = "black"),
+    axis.ticks = element_line(color = "black"),  
+    axis.text = element_text(color = "black"), 
+    legend.position = "none",
+    panel.background = element_rect(fill='transparent'), #transparent panel bg
+    plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+    panel.grid.major = element_blank(), #remove major gridlines
+    panel.grid.minor = element_blank(), #remove minor gridlines
+    
+  )
+# Scatter Plot for Sensitivity vs. Memory
+plot5 <- filtered_results %>%
+  ggplot(aes(x = memory, y = sensitivity, shape = program_name, fill = program_name)) +
+  annotation_custom(
+    grob = g, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf
+  ) +
+  geom_point(size = 3) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1)) + 
+  scale_fill_manual(values = c("SWIF-TE" = SWIFTE_colors[1], "TEfinder" = SWIFTE_colors[2], "TEMP2" = SWIFTE_colors[3], "TIP_finder" = SWIFTE_colors[4])) +
+  scale_shape_manual(values = c(21,22,23,24))+
+  geom_point(size=3, colour='white') +
+  labs(x = "Memory (Gb/TE)", y = "Sensitivity")+
+  guides(color = "none", shape = "none")+
+  labs(x = NULL, y = NULL)+
+  ylim(0, 0.15)+ 
+  theme(text = element_text(color = "black"),
+    axis.line = element_line(color = "black"),
+    axis.ticks = element_line(color = "black"), 
+    axis.text = element_text(color = "black"), 
+    legend.position = "none",
+    panel.background = element_rect(fill='transparent'), #transparent panel bg
+    plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+    panel.grid.major = element_blank(), #remove major gridlines
+    panel.grid.minor = element_blank(), #remove minor gridlines
+    
+  )
+# Scatter Plot for Power of Discovery vs. Memory
+plot6 <- filtered_results %>%
+  ggplot(aes(x = memory, y = power_of_discovery, shape = program_name, fill = program_name)) +
+  annotation_custom(
+    grob = g, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf
+  ) +
+  geom_point(size = 3) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1)) +
+  scale_fill_manual(values = c("SWIF-TE" = SWIFTE_colors[1], "TEfinder" = SWIFTE_colors[2], "TEMP2" = SWIFTE_colors[3], "TIP_finder" = SWIFTE_colors[4])) +
+  scale_shape_manual(values = c(21,22,23,24))+
+  geom_point(size=3, colour='white') +
+  labs(x = "Memory (Gb/TE)", y = "Power of Discovery")+
+  guides(color = "none", shape = "none")+
+  labs(x = NULL, y = NULL)+
+  ylim(0, 0.15)+ 
+  theme( text = element_text(color = "black"),
+    axis.line = element_line(color = "black"),
+    axis.ticks = element_line(color = "black"),  
+    axis.text = element_text(color = "black"), 
+    legend.position = "none",
+    panel.background = element_rect(fill='transparent'), #transparent panel bg
+    plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+    panel.grid.major = element_blank(), #remove major gridlines
+    panel.grid.minor = element_blank(), #remove minor gridlines
+    
+  )
+# Your individual plot code (plot1, plot4, plot2, plot5, plot3, plot6) here
+
+# Combine the plots in a 2x3 grid
+combined_plot <- grid.arrange(plot1, plot4, plot2, plot5, plot3, plot6, ncol = 2)
+
+# Save the combined plot with specific dimensions
+#ggsave("output_plot.png", plot = combined_plot, width = 7.5, height = 5, units = "in", dpi = 300, bg='transparent')
+results_plot <- filtered_results %>%
+  ggplot(aes(x = runtime, y = precision, shape = program_name, fill = program_name)) +
+  annotation_custom(
+    grob = g, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf
+  ) +
+  geom_point(size=3, colour='white') +
+  labs(
+    title = "Scatter Plot for Precision vs. Runtime",
+    x = "Runtime (hours)",
+    y = "Precision",
+    fill = "program"  # Set the legend title for fill
+  ) +
+  ylim(0, 0.4) +
+  scale_fill_manual(values = c("SWIF-TE" = SWIFTE_colors[1], "TEfinder" = SWIFTE_colors[2], "TEMP2" = SWIFTE_colors[3], "TIP_finder" = SWIFTE_colors[4])) +
+  scale_shape_manual(values = c(21,22,24,23)) +
+  guides(
+    shape = guide_legend(title = "program"),  # Set the legend title for shape
+    fill = guide_legend(title = "program")   # Set the legend title for fill
+  ) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1),
+    panel.background = element_rect(fill='transparent'), #transparent panel bg
+    plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+    panel.grid.major = element_blank(), #remove major gridlines
+    panel.grid.minor = element_blank(),
+    legend.key = element_rect(fill = "transparent"), 
+    legend.background = element_rect(fill='transparent'), #transparent legend bg
+    legend.box.background = element_rect(fill = NA, color = "black"),
+    legend.text = element_text(color="black"),
+    legend.title = element_text(color="black"),
+    legend.position= "top"
+    #transparent legend panel
+  ) 
+    
+results_plot
+```
+
+
+
+
+
+
+
+
