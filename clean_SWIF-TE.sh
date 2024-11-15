@@ -63,7 +63,7 @@ awk -v f2="$2" -v f3="$3" -v f4="$4" -v count_filter="$read_count_min" '
     {
         if($1!=kCH || $5-kPOS>15 || $5-kST>50) {
             if(kMXSC>=pL2 && kCNT>=pL3 && (kMX-kMN)>=pL4 && kCNT>=count_filter) {
-                print kCH "\t" kMN-1 "\t" kMX "\tID=" kID ";Count=" kCNT ";TSD_length=" kMX-kMN "\t" kMXSC "\t+"
+                print kCH "\t" kMN-1 "\t" kMX "\tID=" kID ";Count=" kCNT ";range_of_split_start=" kMX-kMN "\t" kMXSC "\t+"
             };
             kST=$5;
             kCH=$1;
