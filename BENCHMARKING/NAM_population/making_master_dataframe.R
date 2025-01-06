@@ -1,0 +1,974 @@
+---
+title: "making_master_dataframe"
+author: "Claire Menard (menar060@umn.edu)"
+date: "2024-01-23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r message = FALSE, warning=FALSE}
+#loading libraries
+library(ggplot2)
+library(tidyr)
+library(devtools)
+library(dplyr)
+library(grid)
+library(RColorBrewer)
+library(gridExtra)
+library(stringr)
+SWIFTE_colors <- c("#332288", "#117733", "#DDCC77", "#CC6677", "#AA4499", "#882255", "#44AA99", "#88CCEE")
+```
+
+
+```{r}
+SWIFTE_TP_FP_FN = read.csv("/users/2/menar060/main_figures/dist_from_genes/merged_Oh43_ALL.bed", header=FALSE, sep='\t')
+SWIFTE_inside_genes = read.csv("/users/2/menar060/main_figures/dist_from_genes/inside_genes_Oh43_All.bed", header = FALSE, sep = '\t')
+colnames(SWIFTE_inside_genes) <- c("gene_chr", "gene_start", "gene_end", "gene_ID", "gene_score", "gene_strand", "gene_NAM", "gene_gene", "gene_attributes", "TIP_chr", "TIP_start", "TIP_end", "TIP_attributes")
+SWIFTE_within_1kb_genes = read.csv("/users/2/menar060/main_figures/dist_from_genes/within_1kb_genes_Oh43_All.bed", header = FALSE, sep = '\t')
+colnames(SWIFTE_within_1kb_genes) <- c("gene_chr", "gene_start", "gene_end", "gene_ID", "gene_score", "gene_strand", "gene_NAM", "gene_gene", "gene_attributes", "TIP_chr", "TIP_start", "TIP_end", "TIP_attributes")
+SWIFTE_within_1_5kb_genes = read.csv("/users/2/menar060/main_figures/dist_from_genes/within_1.5kb_genes_Oh43_All.bed", header = FALSE, sep = '\t')
+colnames(SWIFTE_within_1_5kb_genes) <- c("gene_chr", "gene_start", "gene_end", "gene_ID", "gene_score", "gene_strand", "gene_NAM", "gene_gene", "gene_attributes", "TIP_chr", "TIP_start", "TIP_end", "TIP_attributes")
+SWIFTE_within_2kb_genes = read.csv("/users/2/menar060/main_figures/dist_from_genes/within_2kb_genes_Oh43_All.bed", header = FALSE, sep = '\t')
+colnames(SWIFTE_within_2kb_genes) <- c("gene_chr", "gene_start", "gene_end", "gene_ID", "gene_score", "gene_strand", "gene_NAM", "gene_gene", "gene_attributes", "TIP_chr", "TIP_start", "TIP_end", "TIP_attributes")
+SWIFTE_within_3kb_genes = read.csv("/users/2/menar060/main_figures/dist_from_genes/within_3kb_genes_Oh43_All.bed", header = FALSE, sep = '\t')
+colnames(SWIFTE_within_3kb_genes) <- c("gene_chr", "gene_start", "gene_end", "gene_ID", "gene_score", "gene_strand", "gene_NAM", "gene_gene", "gene_attributes", "TIP_chr", "TIP_start", "TIP_end", "TIP_attributes")
+SWIFTE_within_5kb_genes = read.csv("/users/2/menar060/main_figures/dist_from_genes/within_5kb_genes_Oh43_All.bed", header = FALSE, sep = '\t')
+colnames(SWIFTE_within_5kb_genes) <- c("gene_chr", "gene_start", "gene_end", "gene_ID", "gene_score", "gene_strand", "gene_NAM", "gene_gene", "gene_attributes", "TIP_chr", "TIP_start", "TIP_end", "TIP_attributes")
+
+SWIFTE_outside_genes = read.csv("/users/2/menar060/main_figures/dist_from_genes/outside_genes_Oh43_All.bed", header = FALSE, sep = '\t')
+colnames(SWIFTE_outside_genes) <- c("TIP_chr", "TIP_start", "TIP_end", "TIP_attributes")
+
+
+
+```
+
+```{r}
+library(dplyr)
+
+# Assuming the last column is the one you want to search for "TP", "FP", or "FN"
+library(dplyr)
+
+# Assuming SWIFTE_inside_genes is your dataframe and the last column contains the patterns
+SWIFTE_inside_genes <- SWIFTE_inside_genes %>%
+  mutate(new_column = case_when(
+    grepl("TP_\\d+", .[[ncol(.)]]) ~ sub(".*(TP_\\d+).*", "\\1", .[[ncol(.)]]),
+    grepl("FP_\\d+", .[[ncol(.)]]) ~ sub(".*(FP_\\d+).*", "\\1", .[[ncol(.)]]),
+    grepl("FN_\\d+", .[[ncol(.)]]) ~ sub(".*(FN_\\d+).*", "\\1", .[[ncol(.)]]),
+    TRUE ~ "Other"
+  ))
+
+SWIFTE_within_1kb_genes <- SWIFTE_within_1kb_genes %>%
+  mutate(new_column = case_when(
+    grepl("TP_\\d+", .[[ncol(.)]]) ~ sub(".*(TP_\\d+).*", "\\1", .[[ncol(.)]]),
+    grepl("FP_\\d+", .[[ncol(.)]]) ~ sub(".*(FP_\\d+).*", "\\1", .[[ncol(.)]]),
+    grepl("FN_\\d+", .[[ncol(.)]]) ~ sub(".*(FN_\\d+).*", "\\1", .[[ncol(.)]]),
+    TRUE ~ "Other"
+  ))
+SWIFTE_within_1_5kb_genes <- SWIFTE_within_1_5kb_genes %>%
+  mutate(new_column = case_when(
+    grepl("TP_\\d+", .[[ncol(.)]]) ~ sub(".*(TP_\\d+).*", "\\1", .[[ncol(.)]]),
+    grepl("FP_\\d+", .[[ncol(.)]]) ~ sub(".*(FP_\\d+).*", "\\1", .[[ncol(.)]]),
+    grepl("FN_\\d+", .[[ncol(.)]]) ~ sub(".*(FN_\\d+).*", "\\1", .[[ncol(.)]]),
+    TRUE ~ "Other"
+  ))
+
+SWIFTE_within_2kb_genes <- SWIFTE_within_2kb_genes %>%
+  mutate(new_column = case_when(
+    grepl("TP_\\d+", .[[ncol(.)]]) ~ sub(".*(TP_\\d+).*", "\\1", .[[ncol(.)]]),
+    grepl("FP_\\d+", .[[ncol(.)]]) ~ sub(".*(FP_\\d+).*", "\\1", .[[ncol(.)]]),
+    grepl("FN_\\d+", .[[ncol(.)]]) ~ sub(".*(FN_\\d+).*", "\\1", .[[ncol(.)]]),
+    TRUE ~ "Other"
+  ))
+
+SWIFTE_within_3kb_genes <- SWIFTE_within_3kb_genes %>%
+  mutate(new_column = case_when(
+    grepl("TP_\\d+", .[[ncol(.)]]) ~ sub(".*(TP_\\d+).*", "\\1", .[[ncol(.)]]),
+    grepl("FP_\\d+", .[[ncol(.)]]) ~ sub(".*(FP_\\d+).*", "\\1", .[[ncol(.)]]),
+    grepl("FN_\\d+", .[[ncol(.)]]) ~ sub(".*(FN_\\d+).*", "\\1", .[[ncol(.)]]),
+    TRUE ~ "Other"
+  ))
+
+SWIFTE_within_5kb_genes <- SWIFTE_within_5kb_genes %>%
+  mutate(new_column = case_when(
+    grepl("TP_\\d+", .[[ncol(.)]]) ~ sub(".*(TP_\\d+).*", "\\1", .[[ncol(.)]]),
+    grepl("FP_\\d+", .[[ncol(.)]]) ~ sub(".*(FP_\\d+).*", "\\1", .[[ncol(.)]]),
+    grepl("FN_\\d+", .[[ncol(.)]]) ~ sub(".*(FN_\\d+).*", "\\1", .[[ncol(.)]]),
+    TRUE ~ "Other"
+  ))
+SWIFTE_outside_genes <- SWIFTE_outside_genes %>%
+  mutate(new_column = case_when(
+    grepl("TP_\\d+", .[[ncol(.)]]) ~ sub(".*(TP_\\d+).*", "\\1", .[[ncol(.)]]),
+    grepl("FP_\\d+", .[[ncol(.)]]) ~ sub(".*(FP_\\d+).*", "\\1", .[[ncol(.)]]),
+    grepl("FN_\\d+", .[[ncol(.)]]) ~ sub(".*(FN_\\d+).*", "\\1", .[[ncol(.)]]),
+    TRUE ~ "Other"
+  ))
+
+
+
+```
+
+
+
+
+```{r}
+SWIFTE_inside_genes<- SWIFTE_inside_genes %>%
+  filter(!duplicated(new_column) & !duplicated(new_column, fromLast = TRUE))
+SWIFTE_within_1kb_genes <- SWIFTE_within_1kb_genes %>%
+  filter(!duplicated(new_column) & !duplicated(new_column, fromLast = TRUE)) %>%
+  filter(!new_column %in% SWIFTE_inside_genes$new_column)
+SWIFTE_within_1_5kb_genes <- SWIFTE_within_1_5kb_genes %>%
+  filter(!duplicated(new_column) & !duplicated(new_column, fromLast = TRUE)) %>%
+  filter(!new_column %in% SWIFTE_inside_genes$new_column) %>%
+  filter(!new_column %in% SWIFTE_within_1kb_genes$new_column)
+SWIFTE_within_2kb_genes <- SWIFTE_within_2kb_genes %>%
+  filter(!duplicated(new_column) & !duplicated(new_column, fromLast = TRUE)) %>%
+  filter(!new_column %in% SWIFTE_inside_genes$new_column) %>%
+  filter(!new_column %in% SWIFTE_within_1kb_genes$new_column) %>%
+  filter(!new_column %in% SWIFTE_within_1_5kb_genes$new_column)
+SWIFTE_within_3kb_genes <- SWIFTE_within_3kb_genes %>%
+  filter(!duplicated(new_column) & !duplicated(new_column, fromLast = TRUE))  %>%
+  filter(!new_column %in% SWIFTE_inside_genes$new_column) %>%
+  filter(!new_column %in% SWIFTE_within_1kb_genes$new_column) %>%
+  filter(!new_column %in% SWIFTE_within_1_5kb_genes$new_column) %>%
+  filter(!new_column %in% SWIFTE_within_2kb_genes$new_column)
+SWIFTE_within_5kb_genes <- SWIFTE_within_5kb_genes %>%
+  filter(!duplicated(new_column) & !duplicated(new_column, fromLast = TRUE)) %>%
+  filter(!new_column %in% SWIFTE_inside_genes$new_column) %>%
+  filter(!new_column %in% SWIFTE_within_1kb_genes$new_column) %>%
+  filter(!new_column %in% SWIFTE_within_1_5kb_genes$new_column) %>%
+  filter(!new_column %in% SWIFTE_within_2kb_genes$new_column) %>%
+  filter(!new_column %in% SWIFTE_within_3kb_genes$new_column)
+
+```
+
+```{r}
+
+SWIFTE_inside_genes$location = "inside"
+SWIFTE_within_1kb_genes$location = "0-1kb"
+SWIFTE_within_1_5kb_genes$location = "1-1.5kb"
+SWIFTE_within_2kb_genes$location ="1.5-2kb"
+SWIFTE_within_3kb_genes$location = "2-3kb"
+SWIFTE_within_5kb_genes$location = "3-5kb"
+SWIFTE_outside_genes$location = "5kb+"
+
+```
+
+
+
+```{r}
+#merge dataframes
+concatenated_df <- rbind(SWIFTE_inside_genes, SWIFTE_within_1kb_genes, SWIFTE_within_1_5kb_genes, SWIFTE_within_2kb_genes, SWIFTE_within_3kb_genes, SWIFTE_within_5kb_genes)
+#subsetting out gene info
+SWIFTE_gene_merged_dataframe <- concatenated_df[, c("TIP_chr", "TIP_start", "TIP_end", "TIP_attributes", "new_column", "location")]
+SWIFTE_gene_merged_dataframe <- rbind(SWIFTE_gene_merged_dataframe, SWIFTE_outside_genes)
+SWIFTE_gene_merged_dataframe <- SWIFTE_gene_merged_dataframe %>%
+  mutate(precision = sub("_(.*)", "", new_column))
+
+```
+
+```{r}
+figure_2 <- SWIFTE_gene_merged_dataframe %>%
+  filter(precision != "FN") %>%
+  group_by(location, precision) %>%
+  dplyr::summarize(count = n()) %>%
+  group_by(location) %>%
+  mutate(proportion = count / sum(count)) %>%
+  ggplot(aes(x = factor(location, levels = c("inside", "0-1kb", "1-1.5kb", "1.5-2kb", "2-3kb", "3-5kb", "5kb+")), y = proportion, fill = precision)) +
+  geom_bar(stat = "identity", position = "fill") +
+  ylab("Proportion") +
+  xlab("Distance From Gene") +
+  ylim(0, 1) +
+  theme_minimal() +  # or theme_void() to remove background grid lines
+  scale_fill_manual(values = c("FP" = SWIFTE_colors[5], "TP" = SWIFTE_colors[7]))+# Customize fill colors
+  labs(fill = NULL)  +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+figure_2
+```
+```{r}
+figure_3 <- SWIFTE_gene_merged_dataframe %>%
+  filter(precision == "FN") %>%
+  mutate(total_FN = n()) %>%
+  group_by(location, total_FN, precision) %>%
+  dplyr::summarise(count = n()) %>%
+  group_by(location) %>%
+  mutate(proportion = count/total_FN) %>%
+  ggplot(aes(x = factor(location, levels = c("inside", "0-1kb", "1-1.5kb", "1.5-2kb", "2-3kb", "3-5kb", "5kb+")), y = proportion, fill = precision)) +
+  geom_bar(stat="identity") +
+  xlab("Distance From Gene") +
+  ylab("Proportion") +
+  theme_minimal() +  # or theme_void() to remove background grid lines
+  scale_fill_manual(values = c("FN" = SWIFTE_colors[3]))+# Customize fill colors
+  labs(fill = NULL) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+#figure_2
+#figure_3
+```
+```{r}
+figure_4 <- SWIFTE_gene_merged_dataframe %>%
+  group_by(location, precision) %>%  # Group by location and precision (including FN, TP, etc.)
+  summarize(count = n(), .groups = 'drop') %>%  # Count occurrences of each precision type for each location
+  group_by(location) %>%
+  mutate(total_count = sum(count),  # Calculate total count of all precision types for each location
+         proportion = count / total_count) %>%  # Calculate the proportion for each precision type
+  filter(precision %in% c("FN", "TP")) %>%  # Only plot FN and TP
+  ggplot(aes(x = factor(location, levels = c("inside", "0-1kb", "1-1.5kb", "1.5-2kb", "2-3kb", "3-5kb", "5kb+")), 
+             y = proportion, fill = precision)) +
+  geom_bar(stat = "identity") +  # Stacked bar plot by default
+  xlab("Distance From Gene") +
+  ylab("Proportion") +
+  theme_minimal() +
+  scale_fill_manual(values = c("FN" = SWIFTE_colors[3], "TP" = SWIFTE_colors[7])) +  # Customize fill colors for FN and TP
+  labs(fill = NULL) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+# Display the plot
+figure_4
+
+
+
+
+```
+
+```{r}
+figure_4 <- SWIFTE_gene_merged_dataframe %>%
+  filter(precision %in% c("FN", "TP")) %>%  # Include only FN and TP
+  group_by(location, precision) %>%  # Group by location and precision
+  summarize(count = n(), .groups = 'drop') %>%  # Count occurrences of each precision type for each location
+  mutate(total_count = sum(count),  # Calculate the overall total count of FN and TP across all locations
+         proportion = count / total_count) %>%  # Calculate the proportion for each location based on the overall total count
+  ggplot(aes(x = factor(location, levels = c("inside", "0-1kb", "1-1.5kb", "1.5-2kb", "2-3kb", "3-5kb", "5kb+")), 
+             y = proportion, fill = precision)) +
+  geom_bar(stat = "identity", position = "stack") +  # Stack the bars
+  xlab("Distance From Gene") +
+  ylab("Proportion") +
+  theme_minimal() +
+  scale_fill_manual(values = c("FN" = SWIFTE_colors[3], "TP" = SWIFTE_colors[7])) +  # Customize fill colors for FN and TP
+  labs(fill = NULL) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+# Display the plot
+figure_4
+
+
+
+```
+
+```{r}
+# Filter data for FN (False Negatives)
+figure_4_FNs <- SWIFTE_gene_merged_dataframe %>%
+  filter(precision == "FN") %>%  # Only include FN (False Negatives)
+  group_by(location) %>%  # Group by location (inside gene space vs. outside)
+  summarize(count = n(), .groups = 'drop') %>%  # Count the occurrences of FNs in each location
+  mutate(total_FNs = sum(count),  # Calculate the total number of FNs
+         proportion_in_genes = ifelse(location == "inside", count / total_FNs, 0)) %>%  # Proportion of FNs in gene space
+  ggplot(aes(x = factor(location, levels = c("inside", "0-1kb", "1-1.5kb", "1.5-2kb", "2-3kb", "3-5kb", "5kb+")),
+             y = proportion_in_genes, fill = "Proportion in Gene Space")) +
+  geom_bar(stat = "identity", position = "stack") +  # Stack the bars
+  xlab("Distance From Gene") +
+  ylab("Proportion of FNs in Gene Space") +
+  theme_minimal() +
+  scale_fill_manual(values = c("Proportion in Gene Space" = SWIFTE_colors[3])) +  # Customize fill color for FNs in gene space
+  labs(fill = NULL) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+# Display the plot
+figure_4_FNs
+
+
+```
+
+
+```{r}
+library(gridExtra)
+library(patchwork)
+subplot_height <- 5
+subplot_width <- 3.75
+figure_4 <- figure_4 +
+  #theme(legend.position = "bottom") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  theme(text = element_text(size = 12)) +
+  theme(
+    plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm"),  # Adjust the margins as needed
+    plot.background = element_rect(fill = "white", color = NA),  # Set background color if needed
+    panel.border = element_blank(),
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(),     # Remove panel border
+    axis.line = element_line(),          # Show axes lines
+    axis.ticks = element_line(),         # Show tick marks
+    axis.ticks.length = unit(0.2, "cm")  # Set the length of tick marks
+  )
+figure_2 <- figure_2 +
+  #theme(legend.position = "bottom") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  theme(text = element_text(size = 12)) +
+  theme(
+    plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm"),  # Adjust the margins as needed
+    plot.background = element_rect(fill = "white", color = NA),  # Set background color if needed
+    panel.border = element_blank(),
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(),     # Remove panel border
+    axis.line = element_line(),          # Show axes lines
+    axis.ticks = element_line(),         # Show tick marks
+    axis.ticks.length = unit(0.2, "cm")  # Set the length of tick marks
+  )
+figure_2
+# Move legend below the plot and rotate x-axis ticks in figure_3
+figure_3 <- figure_3 +
+  #theme(legend.position = "bottom") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  theme(text = element_text(size = 12))+
+  theme(
+    plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm"),  # Adjust the margins as needed
+    plot.background = element_rect(fill = "white", color = NA),  # Set background color if needed
+    panel.border = element_blank(),
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(),     # Remove panel border
+    axis.line = element_line(),          # Show axes lines
+    axis.ticks = element_line(),         # Show tick marks
+    axis.ticks.length = unit(0.2, "cm")  # Set the length of tick marks
+  )
+figure_3
+combined_figure <- 
+  figure_4 + 
+  labs(subtitle = "Polymorphic TEs") +
+  figure_2 + 
+  labs(subtitle = "TIPs called by SWIF-TE") +
+  plot_layout(ncol = 1,
+              heights = c(subplot_height),
+              widths = c(subplot_width) )+
+  theme(
+    plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "cm"),  # Adjust the margins as needed
+    plot.background = element_rect(fill = "white", color = NA),  # Set background color if needed
+    panel.border = element_blank(),
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(),     # Remove panel border
+    axis.line = element_line(),          # Show axes lines
+    axis.ticks = element_line(),         # Show tick marks
+    axis.ticks.length = unit(0.2, "cm")  # Set the length of tick marks
+  )# Remove the border around the plot 
+  
+  # +plot_annotation(title = "Combined Plot")  # Add title if needed
+
+combined_figure
+ggsave("combined_plot.png", combined_figure, width = 5, height = 7, units = "in", dpi = 300)
+```
+
+
+
+```{r}
+library(dplyr)
+
+# Count total FP, TP, and FN
+total_counts <- SWIFTE_gene_merged_dataframe %>%
+  group_by(precision) %>%  # Group by precision column
+  summarize(count = n())   # Count the number of each precision type
+
+# Display the counts
+total_counts
+
+```
+
+
+```{r}
+####
+REF_TEs_inside_genes = read.csv("/users/2/menar060/main_figures/dist_from_genes/within_genes_filtered_B73.EDTA.TEanno.bed", header = FALSE, sep = '\t')
+colnames(REF_TEs_inside_genes) <- c("REF_TE_chr", "REF_TE_start", "REF_TE_end", "REF_TE_family", "REF_TE_score", "REF_TE_strand", "REF_TE_EDTA", "REF_TE_superfamily", "REF_TE_attributes")
+REF_TEs_within_1kb_genes = read.csv("/users/2/menar060/main_figures/dist_from_genes/within_1kb_filtered_B73.EDTA.TEanno.bed", header = FALSE, sep = '\t')
+colnames(REF_TEs_within_1kb_genes) <- c("REF_TE_chr", "REF_TE_start", "REF_TE_end", "REF_TE_family", "REF_TE_score", "REF_TE_strand", "REF_TE_EDTA", "REF_TE_superfamily", "REF_TE_attributes")
+REF_TEs_within_1_5kb_genes = read.csv("/users/2/menar060/main_figures/dist_from_genes/within_1.5kb_filtered_B73.EDTA.TEanno.bed", header = FALSE, sep = '\t')
+colnames(REF_TEs_within_1_5kb_genes) <- c("REF_TE_chr", "REF_TE_start", "REF_TE_end", "REF_TE_family", "REF_TE_score", "REF_TE_strand", "REF_TE_EDTA", "REF_TE_superfamily", "REF_TE_attributes")
+REF_TEs_within_2kb_genes = read.csv("/users/2/menar060/main_figures/dist_from_genes/within_2kb_filtered_B73.EDTA.TEanno.bed", header = FALSE, sep = '\t')
+colnames(REF_TEs_within_2kb_genes) <- c("REF_TE_chr", "REF_TE_start", "REF_TE_end", "REF_TE_family", "REF_TE_score", "REF_TE_strand", "REF_TE_EDTA", "REF_TE_superfamily", "REF_TE_attributes")
+REF_TEs_within_3kb_genes = read.csv("/users/2/menar060/main_figures/dist_from_genes/within_3kb_filtered_B73.EDTA.TEanno.bed", header = FALSE, sep = '\t')
+colnames(REF_TEs_within_3kb_genes) <- c("REF_TE_chr", "REF_TE_start", "REF_TE_end", "REF_TE_family", "REF_TE_score", "REF_TE_strand", "REF_TE_EDTA", "REF_TE_superfamily", "REF_TE_attributes")
+REF_TEs_within_5kb_genes = read.csv("/users/2/menar060/main_figures/dist_from_genes/within_5kb_filtered_B73.EDTA.TEanno.bed", header = FALSE, sep = '\t')
+colnames(REF_TEs_within_5kb_genes) <- c("REF_TE_chr", "REF_TE_start", "REF_TE_end", "REF_TE_family", "REF_TE_score", "REF_TE_strand", "REF_TE_EDTA", "REF_TE_superfamily", "REF_TE_attributes")
+REF_TEs_outside_genes = read.csv("/users/2/menar060/main_figures/dist_from_genes/outside_filtered_B73.EDTA.TEanno.bed", header = FALSE, sep = '\t')
+colnames(REF_TEs_outside_genes) <- c("REF_TE_chr", "REF_TE_start", "REF_TE_end", "REF_TE_family", "REF_TE_score", "REF_TE_strand", "REF_TE_EDTA", "REF_TE_superfamily", "REF_TE_attributes")
+
+REF_TEs_inside_genes<- REF_TEs_inside_genes %>%
+  filter(!duplicated(REF_TE_attributes) & !duplicated(REF_TE_attributes, fromLast = TRUE))
+REF_TEs_within_1kb_genes <- REF_TEs_within_1kb_genes %>%
+  filter(!duplicated(REF_TE_attributes) & !duplicated(REF_TE_attributes, fromLast = TRUE)) %>%
+  filter(!REF_TE_attributes %in% REF_TEs_inside_genes$REF_TE_attributes)
+REF_TEs_within_1_5kb_genes <- REF_TEs_within_1_5kb_genes %>%
+  filter(!duplicated(REF_TE_attributes) & !duplicated(REF_TE_attributes, fromLast = TRUE)) %>%
+  filter(!REF_TE_attributes %in% REF_TEs_inside_genes$REF_TE_attributes) %>%
+  filter(!REF_TE_attributes %in% REF_TEs_within_1kb_genes$REF_TE_attributes)
+REF_TEs_within_2kb_genes <- REF_TEs_within_2kb_genes %>%
+  filter(!duplicated(REF_TE_attributes) & !duplicated(REF_TE_attributes, fromLast = TRUE)) %>%
+  filter(!REF_TE_attributes %in% REF_TEs_inside_genes$REF_TE_attributes) %>%
+  filter(!REF_TE_attributes %in% REF_TEs_within_1kb_genes$REF_TE_attributes) %>%
+  filter(!REF_TE_attributes %in% REF_TEs_within_1_5kb_genes$REF_TE_attributes)
+REF_TEs_within_3kb_genes <- REF_TEs_within_3kb_genes %>%
+  filter(!duplicated(REF_TE_attributes) & !duplicated(REF_TE_attributes, fromLast = TRUE))  %>%
+  filter(!REF_TE_attributes %in% REF_TEs_inside_genes$REF_TE_attributes) %>%
+  filter(!REF_TE_attributes %in% REF_TEs_within_1kb_genes$REF_TE_attributes) %>%
+  filter(!REF_TE_attributes %in% REF_TEs_within_1_5kb_genes$REF_TE_attributes) %>%
+  filter(!REF_TE_attributes %in% REF_TEs_within_2kb_genes$REF_TE_attributes)
+REF_TEs_within_5kb_genes <- REF_TEs_within_5kb_genes %>%
+  filter(!duplicated(REF_TE_attributes) & !duplicated(REF_TE_attributes, fromLast = TRUE)) %>%
+  filter(!REF_TE_attributes %in% REF_TEs_inside_genes$REF_TE_attributes) %>%
+  filter(!REF_TE_attributes %in% REF_TEs_within_1kb_genes$REF_TE_attributes) %>%
+  filter(!REF_TE_attributes %in% REF_TEs_within_1_5kb_genes$REF_TE_attributes) %>%
+  filter(!REF_TE_attributes %in% REF_TEs_within_2kb_genes$REF_TE_attributes) %>%
+  filter(!REF_TE_attributes %in% REF_TEs_within_3kb_genes$REF_TE_attributes)
+
+
+REF_TEs_inside_genes$location = "inside"
+REF_TEs_within_1kb_genes$location = "0-1kb"
+REF_TEs_within_1_5kb_genes$location = "1-1.5kb"
+REF_TEs_within_2kb_genes$location ="1.5-2kb"
+REF_TEs_within_3kb_genes$location = "2-3kb"
+REF_TEs_within_5kb_genes$location = "3-5kb"
+REF_TEs_outside_genes$location = "5kb+"
+
+concatenated_df_ref_TEs <- rbind(REF_TEs_inside_genes, REF_TEs_within_1kb_genes, REF_TEs_within_1_5kb_genes, REF_TEs_within_2kb_genes, REF_TEs_within_3kb_genes, REF_TEs_within_5kb_genes, REF_TEs_outside_genes)
+structural_ref_TEs <- concatenated_df_ref_TEs[grepl("Method=structural", concatenated_df_ref_TEs$REF_TE_attributes, ignore.case=TRUE), ]
+
+
+
+```
+
+
+
+```{r}
+structural_ref_TEs %>%
+  mutate(total = n()) %>%
+  group_by(location, total) %>%
+  summarise(count = n()) %>%
+  group_by(location) %>%
+  mutate(proportion = count/ total) %>%
+  ggplot(aes(x = factor(location, levels = c("inside", "0-1kb", "1-1.5kb", "1.5-2kb", "2-3kb", "3-5kb", "5kb+")), y = proportion)) +
+  geom_bar(stat="identity") +
+  xlab("distance from gene")+
+  ylab("Proportion") +
+  ylim(0, 1)
+
+
+
+```
+
+```{r}
+structural_ref_TEs <- structural_ref_TEs %>%
+  dplyr::mutate(Classification = str_extract(REF_TE_attributes, "Classification=([^;]+)")  %>%
+                          str_remove("Classification=")) 
+unique(structural_ref_TEs$Classification)
+
+concatenated_df_ref_TEs <- concatenated_df_ref_TEs %>%
+  dplyr::mutate(Classification = str_extract(REF_TE_attributes, "Classification=([^;]+)")  %>%
+                          str_remove("Classification=")) 
+unique(concatenated_df_ref_TEs$Classification)
+```
+
+```{r}
+
+structural_ref_TEs <- structural_ref_TEs %>%
+  mutate(
+    Superfamily = case_when(
+      Classification == "LTR/Copia" ~ "RLC",
+      Classification == "DNA/DTA" ~ "DTA",
+      Classification == "DNA/DTT" ~ "DTT",
+      Classification == "MITE/DTA" ~ "DTA",
+      Classification == "LTR/unknown" ~ "RLX",
+      Classification == "LTR/Gypsy" ~ "RLG",
+      Classification == "DNA/DTC" ~ "DTC",
+      Classification == "MITE/DTH" ~ "DTH",
+      Classification == "MITE/DTM" ~ "DTM",
+      Classification == "DNA/DTM" ~ "DTM",
+      Classification == "DNA/DTH" ~ "DTH",
+      Classification == "MITE/DTT" ~ "DTT",
+      Classification == "MITE/DTC" ~ "DTC",
+      TRUE ~ NA_character_
+    ),
+    Order = case_when(
+      Classification == "LTR/Copia" ~ "LTR",
+      Classification == "DNA/DTA" ~ "TIR",
+      Classification == "DNA/DTT" ~ "TIR",
+      Classification == "MITE/DTA" ~ "TIR",
+      Classification == "LTR/unknown" ~ "LTR",
+      Classification == "LTR/Gypsy" ~ "LTR",
+      Classification == "DNA/DTC" ~ "TIR",
+      Classification == "MITE/DTH" ~ "TIR", 
+      Classification == "MITE/DTM" ~ "TIR",
+      Classification == "DNA/DTM" ~ "TIR", 
+      Classification == "DNA/DTH" ~ "TIR", 
+      Classification == "MITE/DTT" ~ "TIR",
+      Classification == "MITE/DTC" ~ "TIR",
+      TRUE ~ NA_character_
+    )
+  )
+
+concatenated_df_ref_TEs <- concatenated_df_ref_TEs %>%
+  mutate(
+    Superfamily = case_when(
+      Classification == "LTR/Copia" ~ "RLC",
+      Classification == "DNA/DTA" ~ "DTA",
+      Classification == "DNA/DTT" ~ "DTT",
+      Classification == "MITE/DTA" ~ "DTA",
+      Classification == "LTR/unknown" ~ "RLX",
+      Classification == "LTR/Gypsy" ~ "RLG",
+      Classification == "DNA/DTC" ~ "DTC",
+      Classification == "MITE/DTH" ~ "DTH",
+      Classification == "MITE/DTM" ~ "DTM",
+      Classification == "DNA/DTM" ~ "DTM",
+      Classification == "DNA/DTH" ~ "DTH",
+      Classification == "MITE/DTT" ~ "DTT",
+      Classification == "MITE/DTC" ~ "DTC",
+      Classification == "LTR/Ty3" ~ "RLG",
+      Classification == "LINE/L1" ~ "RIL",
+      Classification == "LINE/unknown" ~ "RIL",
+      Classification == "LINE/RTE" ~ "RIL", 
+      Classification == "LTR/CRM" ~  "RLG",
+      TRUE ~ NA_character_
+    ),
+    Order = case_when(
+      Classification == "LTR/Copia" ~ "LTR",
+      Classification == "DNA/DTA" ~ "TIR",
+      Classification == "DNA/DTT" ~ "TIR",
+      Classification == "MITE/DTA" ~ "TIR",
+      Classification == "LTR/unknown" ~ "LTR",
+      Classification == "LTR/Gypsy" ~ "LTR",
+      Classification == "DNA/DTC" ~ "TIR",
+      Classification == "MITE/DTH" ~ "TIR", 
+      Classification == "MITE/DTM" ~ "TIR",
+      Classification == "DNA/DTM" ~ "TIR", 
+      Classification == "DNA/DTH" ~ "TIR", 
+      Classification == "MITE/DTT" ~ "TIR",
+      Classification == "MITE/DTC" ~ "TIR",
+      Classification == "LTR/Ty3" ~ "LTR",
+      Classification == "LINE/L1" ~ "LTR",
+      Classification == "LINE/unknown" ~ "LTR",
+      Classification == "LINE/RTE" ~ "LTR", 
+      Classification == "LTR/CRM" ~  "LTR",
+      TRUE ~ NA_character_
+    )
+  )
+
+```
+
+
+
+```{r}
+structural_ref_TEs %>% group_by(Order) %>% summarize(count=n())
+structural_ref_TEs$precision = "Annotated"
+
+concatenated_df_ref_TEs %>% group_by(Order) %>% summarize(count=n())
+structural_ref_TEs$precision = "Annotated"
+
+combined_data %>% group_by(Order)%>% summarize(count=n())
+combined_data$precision = "Polymorphic"
+```
+
+
+
+
+
+
+
+```{r}
+SWIFTE_gene_merged_dataframe <- SWIFTE_gene_merged_dataframe %>%
+  mutate(TE_family = gsub(".*(TE_[^;]+).*", "\\1", TIP_attributes)) %>%
+  mutate(TE_family = ifelse(TE_family == TIP_attributes, 
+                            gsub(".*ID=([^;]+);.*", "\\1", TIP_attributes), 
+                            TE_family))
+concatenated_df_ref_TEs <- concatenated_df_ref_TEs %>%
+  mutate(TE_ID_extracted = gsub(".*ID=([^;]+);.*", "\\1", REF_TE_attributes))
+concatenated_df_ref_TEs <- concatenated_df_ref_TEs %>%
+  mutate(TE_Name_extracted = gsub(".*Name=([^;]+);.*", "\\1", REF_TE_attributes))
+
+library(dplyr)
+
+# Step 1: Perform the first left join based on TE_ID_extracted
+merged_dataframe <- SWIFTE_gene_merged_dataframe %>%
+  left_join(concatenated_df_ref_TEs %>% select(TE_ID_extracted, Classification), 
+            by = c("TE_family" = "TE_ID_extracted"))
+
+# Step 2: Perform the second left join based on TE_Name_extracted
+merged_dataframe <- merged_dataframe %>%
+  left_join(concatenated_df_ref_TEs %>% select(TE_Name_extracted, Classification), 
+            by = c("TE_family" = "TE_Name_extracted"), suffix = c("_ID", "_Name"))
+
+# Step 3: Combine the Classification columns, prioritizing non-NA values
+merged_dataframe <- merged_dataframe %>%
+  mutate(Classification = coalesce(Classification_ID, Classification_Name))
+
+# Step 4: Drop the extra Classification columns after coalescing
+merged_dataframe <- merged_dataframe %>%
+  select(-Classification_ID, -Classification_Name)
+# Step 5: Keep only unique rows, keeping the first instance in case of duplicates
+merged_dataframe <- merged_dataframe %>%
+  distinct(TE_family, .keep_all = TRUE)
+
+
+```
+
+```{r}
+merged_dataframe <- merged_dataframe %>%
+  mutate(
+    Superfamily = case_when(
+      Classification == "LTR/Copia" ~ "RLC",
+      Classification == "DNA/DTA" ~ "DTA",
+      Classification == "DNA/DTT" ~ "DTT",
+      Classification == "MITE/DTA" ~ "DTA",
+      Classification == "LTR/unknown" ~ "RLX",
+      Classification == "LTR/Gypsy" ~ "RLG",
+      Classification == "DNA/DTC" ~ "DTC",
+      Classification == "MITE/DTH" ~ "DTH",
+      Classification == "MITE/DTM" ~ "DTM",
+      Classification == "DNA/DTM" ~ "DTM",
+      Classification == "DNA/DTH" ~ "DTH",
+      Classification == "MITE/DTT" ~ "DTT",
+      Classification == "MITE/DTC" ~ "DTC",
+      Classification == "LTR/Ty3" ~ "RLG",
+      Classification == "LINE/L1" ~ "RIL",
+      Classification == "LINE/unknown" ~ "RIL",
+      Classification == "LINE/RTE" ~ "RIL", 
+      Classification == "LTR/CRM" ~  "RLG",
+      TRUE ~ NA_character_
+    ),
+    Order = case_when(
+      Classification == "LTR/Copia" ~ "LTR",
+      Classification == "DNA/DTA" ~ "TIR",
+      Classification == "DNA/DTT" ~ "TIR",
+      Classification == "MITE/DTA" ~ "TIR",
+      Classification == "LTR/unknown" ~ "LTR",
+      Classification == "LTR/Gypsy" ~ "LTR",
+      Classification == "DNA/DTC" ~ "TIR",
+      Classification == "MITE/DTH" ~ "TIR", 
+      Classification == "MITE/DTM" ~ "TIR",
+      Classification == "DNA/DTM" ~ "TIR", 
+      Classification == "DNA/DTH" ~ "TIR", 
+      Classification == "MITE/DTT" ~ "TIR",
+      Classification == "MITE/DTC" ~ "TIR",
+      Classification == "LTR/Ty3" ~ "LTR",
+      Classification == "LINE/L1" ~ "LTR",
+      Classification == "LINE/unknown" ~ "LTR",
+      Classification == "LINE/RTE" ~ "LTR", 
+      Classification == "LTR/CRM" ~  "LTR",
+      TRUE ~ NA_character_
+    )
+  )
+merged_dataframe -> SWIFTE_gene_merged_dataframe_faminfo
+```
+
+
+```{r}
+# Combine TP and FN into one dataset
+combined_data <- SWIFTE_gene_merged_dataframe_faminfo %>%
+  drop_na() %>%
+  filter(precision %in% c("TP", "FN")) %>%  # Filter for TP and FN
+  group_by(location, Order) %>%
+  summarize(count = n(), .groups = 'drop') %>%  # Summarize counts for both TP and FN
+  group_by(location) %>%
+  mutate(total_count = sum(count)) %>%  # Get total counts for each location
+  ungroup() %>%
+  mutate(proportion = count / total_count)  # Calculate the proportion
+
+# Create the stacked bar plot
+plot_combined <- combined_data %>%
+  drop_na() %>%
+  ggplot(aes(x = factor(location, levels = c("inside", "0-1kb", "1-1.5kb", "1.5-2kb", "2-3kb", "3-5kb", "5kb+")),
+             y = proportion, fill = Order)) +
+  geom_bar(stat = "identity") +  # Stacked bars by default
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title.x = element_text(face = "bold"),
+        axis.text = element_text(size = 10)) +
+  labs(x = "Distance from Gene", y = "Proportion") +
+  scale_fill_manual(values = c(SWIFTE_colors[2], SWIFTE_colors[5])) +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(), 
+        axis.line = element_line(), 
+        axis.ticks = element_line(), 
+        axis.ticks.length = unit(0.2, "cm"))
+
+# Display the plot
+plot_combined
+
+
+
+
+
+```
+
+```{r}
+library(dplyr)
+library(stringr)
+library(ggplot2)
+
+# Prepare your dataframe (if not already done)
+merged_dataframe <- merged_dataframe %>%
+  mutate(Count = str_extract(TIP_attributes, "(?<=;Count=)\\d+")) %>%
+  mutate(Count = as.numeric(Count))  # Convert extracted Count values to numeric
+
+# Summarize the data to count occurrences of each Count value by precision
+count_distribution <- merged_dataframe %>%
+  group_by(Count, precision) %>%
+  summarise(Frequency = n(), .groups = 'drop')  # Count occurrences of each Count value
+
+# Print the summarized dataframe (optional)
+print(count_distribution)
+```
+```{r}
+ggplot(count_distribution, aes(x = Count, y = Frequency, fill = precision)) +
+  geom_bar(stat = "identity", position = "dodge") +  # Use stat="identity" to use the Frequency values directly
+  labs(title = "Distribution of Counts for TP and FP",
+       x = "Count",
+       y = "Frequency") +
+  scale_fill_manual(values = c("TP" = "#117733", "FP" = "#CC6677")) +  # Custom colors for TP and FP
+  theme_minimal()
+
+```
+
+
+```{r}
+
+library(ggplot2)
+library(cowplot)
+
+# Your first dataframe with three precision levels
+plot1 <- SWIFTE_gene_merged_dataframe_faminfo %>%
+  drop_na() %>%
+  filter(precision=="TP") %>%
+  group_by(location, Order, precision) %>%
+  summarize(count = n()) %>%
+  group_by(location, precision) %>%
+  mutate(total_precision_count = sum(count)) %>%
+  ungroup() %>%
+  mutate(proportion = count / total_precision_count) %>%
+  ggplot(aes(x = factor(location, levels = c("inside", "0-1kb", "1-1.5kb", "1.5-2kb", "2-3kb", "3-5kb", "5kb+")), y = proportion, fill = Order)) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title.x = element_text(face = "bold"),
+        axis.text = element_text(size = 10)) +
+  labs(x = "Distance from Gene") +
+  scale_fill_manual(values = c(SWIFTE_colors[2], SWIFTE_colors[5])) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
+    theme(panel.border = element_blank(),      # Remove panel border
+          axis.line = element_line(),          # Show axes lines
+          axis.ticks = element_line(),         # Show tick marks
+          axis.ticks.length = unit(0.2, "cm") )
+plot2 <- SWIFTE_gene_merged_dataframe_faminfo %>%
+  drop_na() %>%
+  filter(precision=="FP") %>%
+  group_by(location, Order, precision) %>%
+  summarize(count = n()) %>%
+  group_by(location, precision) %>%
+  mutate(total_precision_count = sum(count)) %>%
+  ungroup() %>%
+  mutate(proportion = count / total_precision_count) %>%
+  ggplot(aes(x = factor(location, levels = c("inside", "0-1kb", "1-1.5kb", "1.5-2kb", "2-3kb", "3-5kb", "5kb+")), y = proportion, fill = Order)) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title.x = element_text(face = "bold"),
+        axis.text = element_text(size = 10)) +
+  labs(x = "Distance from Gene") +
+  scale_fill_manual(values = c(SWIFTE_colors[2], SWIFTE_colors[5])) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+    theme(panel.border = element_blank(),      # Remove panel border
+          axis.line = element_line(),          # Show axes lines
+          axis.ticks = element_line(),         # Show tick marks
+          axis.ticks.length = unit(0.2, "cm"))
+
+plot3 <- SWIFTE_gene_merged_dataframe_faminfo %>%
+  drop_na() %>%
+  filter(precision=="FN") %>%
+  group_by(location, Order, precision) %>%
+  summarize(count = n()) %>%
+  group_by(location, precision) %>%
+  mutate(total_precision_count = sum(count)) %>%
+  ungroup() %>%
+  mutate(proportion = count / total_precision_count) %>%
+  ggplot(aes(x = factor(location, levels = c("inside", "0-1kb", "1-1.5kb", "1.5-2kb", "2-3kb", "3-5kb", "5kb+")), y = proportion, fill = Order)) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title.x = element_text(face = "bold"),
+        axis.text = element_text(size = 10)) +
+  labs(x = "Distance from Gene") +
+  scale_fill_manual(values = c(SWIFTE_colors[2], SWIFTE_colors[5])) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
+    theme(panel.border = element_blank(),      # Remove panel border
+          axis.line = element_line(),          # Show axes lines
+          axis.ticks = element_line(),         # Show tick marks
+          axis.ticks.length = unit(0.2, "cm"))+
+  facet_grid(~precision)
+# Your second dataframe with one precision level
+plot4 <- structural_ref_TEs %>%
+  drop_na() %>%
+  mutate(precision = "Annotated") %>%
+  group_by(location, Order, precision) %>%
+  summarize(count = n()) %>%
+  group_by(location, precision) %>%
+  mutate(total_precision_count = sum(count)) %>%
+  ungroup() %>%
+  mutate(proportion = count / total_precision_count) %>%
+  ggplot(aes(x = factor(location, levels = c("inside", "0-1kb", "1-1.5kb", "1.5-2kb", "2-3kb", "3-5kb", "5kb+")), y = proportion, fill = Order)) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title.x = element_text(face = "bold"),
+        axis.text = element_text(size = 10)) +
+  labs(x = "Distance from Gene") +
+  scale_fill_manual(values = c(SWIFTE_colors[2], SWIFTE_colors[5]))+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
+    theme(panel.border = element_blank(),      # Remove panel border
+          axis.line = element_line(),          # Show axes lines
+          axis.ticks = element_line(),         # Show tick marks
+          axis.ticks.length = unit(0.2, "cm")  # Set the length of tick marks
+  )
+
+# Combine plots using cowplot
+combined_plot <- plot_grid(plot1, plot2, plot3, plot4, ncol = 1)
+print(plot1)
+# Print the combined plot
+print(combined_plot)
+ggsave("combined_figure.png", combined_plot, width = 5, height = 9, units = "in", dpi = 300)
+
+```
+
+```{r}
+polymorphic_data <- tibble(
+  location = c("0-1kb", "0-1kb", "1-1.5kb", "1-1.5kb", "1.5-2kb", "1.5-2kb", "2-3kb", "2-3kb", "3-5kb", "3-5kb", "5kb+", "5kb+", "inside", "inside"),
+  Order = c("LTR", "TIR", "LTR", "TIR", "LTR", "TIR", "LTR", "TIR", "LTR", "TIR", "LTR", "TIR", "LTR", "TIR"),
+  count = c(633, 790, 181, 238, 136, 174, 206, 223, 212, 231, 1437, 1534, 634, 819),
+  total_precision_count = c(1423, 1423, 419, 419, 310, 310, 429, 429, 443, 443, 2971, 2971, 1453, 1453),
+  proportion = c(0.4448349, 0.5551651, 0.4319809, 0.5680191, 0.4387097, 0.5612903, 0.4801865, 0.5198135, 0.4785553, 0.5214447, 0.4836755, 0.5163245, 0.4363386, 0.5636614),
+  precision = "Polymorphic"
+)
+
+
+```
+
+
+```{r}
+data1 <- SWIFTE_gene_merged_dataframe_faminfo %>%
+  drop_na() %>%
+  filter(precision=="TP") %>%
+  group_by(location, Order, precision) %>%
+  summarize(count = n()) %>%
+  group_by(location, precision) %>%
+  mutate(total_precision_count = sum(count)) %>%
+  ungroup() %>%
+  mutate(proportion = count / total_precision_count)
+data2 <- SWIFTE_gene_merged_dataframe_faminfo %>%
+  drop_na() %>%
+  filter(precision=="FP") %>%
+  group_by(location, Order, precision) %>%
+  summarize(count = n()) %>%
+  group_by(location, precision) %>%
+  mutate(total_precision_count = sum(count)) %>%
+  ungroup() %>%
+  mutate(proportion = count / total_precision_count)
+data3 <- SWIFTE_gene_merged_dataframe_faminfo %>%
+  drop_na() %>%
+  filter(precision=="FN") %>%
+  group_by(location, Order, precision) %>%
+  summarize(count = n()) %>%
+  group_by(location, precision) %>%
+  mutate(total_precision_count = sum(count)) %>%
+  ungroup() %>%
+  mutate(proportion = count / total_precision_count)
+data4 <- structural_ref_TEs %>%
+  drop_na() %>%
+  filter(precision=="Annotated") %>%
+  group_by(location, Order, precision) %>%
+  summarize(count = n()) %>%
+  group_by(location, precision) %>%
+  mutate(total_precision_count = sum(count)) %>%
+  ungroup() %>%
+  mutate(proportion = count / total_precision_count)
+combined_data14 <-bind_rows(
+  data1 %>% mutate(dataset = "TP"),
+  data2 %>% mutate(dataset = "FP"),
+  data3 %>% mutate(dataset = "FN"),
+  data4 %>% mutate(dataset = "Annotated"),
+  polymorphic_data %>% mutate(dataset= "Polymorphic")
+)
+
+```
+
+
+
+```{r}
+order_distance_from_gene_plot <- combined_data14 %>%
+  drop_na() %>%
+  ggplot(aes(x = factor(location, levels = c("inside", "0-1kb", "1-1.5kb", "1.5-2kb", "2-3kb", "3-5kb", "5kb+")), y = proportion, fill = Order)) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.text = element_text(size = 10)) +
+  labs(x = "Distance from Gene", y= "Proportion") +
+  scale_fill_manual(values = c(SWIFTE_colors[8], SWIFTE_colors[4])) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+    theme(panel.border = element_blank(),      # Remove panel border
+          axis.line = element_line(),          # Show axes lines
+          axis.ticks = element_line(),         # Show tick marks
+          axis.ticks.length = unit(0.2, "cm"))+
+  facet_wrap(~precision, scales = "free_y", ncol = 1)
+order_distance_from_gene_plot
+ggsave("order_distance_from_gene_plot.png", order_distance_from_gene_plot, width = 3.75, height = 5, units = "in", dpi = 300) 
+  
+```
+```{r}
+order_distance_from_gene_plot <- combined_data14 %>%
+  drop_na() %>%
+  mutate(precision = factor(precision, levels = c("Annotated", "Polymorphic", "TP", "FN", "FP"))) %>%  # Set the order of precision
+  ggplot(aes(x = factor(location, levels = c("inside", "0-1kb", "1-1.5kb", "1.5-2kb", "2-3kb", "3-5kb", "5kb+")), 
+             y = proportion, fill = Order)) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.text = element_text(size = 10)) +
+  labs(x = "Distance from Gene", y = "Proportion") +
+  scale_fill_manual(values = c(SWIFTE_colors[8], SWIFTE_colors[4])) +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),      # Remove panel border
+        axis.line = element_line(),          # Show axes lines
+        axis.ticks = element_line(),         # Show tick marks
+        axis.ticks.length = unit(0.2, "cm")) +
+  facet_wrap(~precision, scales = "free_y", ncol = 1)
+
+# Display the plot
+order_distance_from_gene_plot
+
+# Save the plot
+ggsave("order_distance_from_gene_plot.png", order_distance_from_gene_plot, width = 3.75, height = 5, units = "in", dpi = 300)
+
+
+
+```
+
+```{r}
+
+combined_data14_cleaned <- combined_data14 %>%
+  drop_na(Order)  # Specify the columns to check for NA values
+
+order_distance_from_gene_plot <- combined_data14_cleaned %>%
+  group_by(location) %>%  # Group by location to normalize proportions
+  mutate(proportion = proportion / sum(proportion)) %>% 
+  ggplot(aes(x = factor(location, levels = c("inside", "0-1kb", "1-1.5kb", "1.5-2kb", "2-3kb", "3-5kb", "5kb+")), 
+             y = proportion, fill = precision)) +  # Use precision for fill
+  geom_bar(stat = "identity", position = "dodge") +  # Dodge to place bars side-by-side
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.text = element_text(size = 10)) +
+  labs(x = "Distance from Gene", y = "Proportion") +
+  scale_fill_manual(values = c("TP" = SWIFTE_colors[8], "FN" = SWIFTE_colors[4])) +  # Define colors for TP and FN
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(), 
+        axis.line = element_line(), 
+        axis.ticks = element_line(), 
+        axis.ticks.length = unit(0.2, "cm"))
+
+# Display the plot
+order_distance_from_gene_plot
+```
+
+
+
